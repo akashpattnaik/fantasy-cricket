@@ -21,6 +21,8 @@ def extract_batting_data(series_id, match_id):
             if len(cols) == 1:
                 continue
             if len(cols) >= 8:
+                if (cols[7] == '-'):
+                    cols[7] = 100 # this is when a batsman has not faced a ball, set to 100 so points aren't deducted for SR
                 batsmen_df = batsmen_df.append(pd.Series(
                 [re.sub(r"\W+", ' ', cols[0].split("(c)")[0]).strip(), cols[1], 
                 int(cols[2]), int(cols[3]), int(cols[5]), int(cols[6]), float(cols[7]), i % 2], 
