@@ -102,12 +102,12 @@ for litag in ultag.find_all('li'):
                 cols=[x.text.strip() for x in cols]
                 if len(cols) >= 8:
                     player_entry = re.sub(r"\W+", ' ', cols[0].split("(c)")[0]).strip()
-                    if name.split()[-1] in player_entry and len(players[name]) != 3:
+                    if name.split()[-1] in player_entry and name[0] == player_entry[0] and len(players[name]) != 4:
                         players[name].append(player_entry)
                 if len(cols) == 2:
                     if cols[1] == 'Batsman' or cols[1] == 'Allrounder' or cols[1] == 'Bowler' or cols[1] == 'Wicketkeeper':
                         player_entry = re.sub(r"\W+", ' ', cols[0].split("(c)")[0]).strip()
-                        if name.split()[-1] in player_entry and len(players[name]) != 3:
+                        if name.split()[-1] in player_entry and name[0] == player_entry[0] and len(players[name]) != 4:
                             players[name].append(player_entry)
                 if (len(players[name]) == 3):
                     break
