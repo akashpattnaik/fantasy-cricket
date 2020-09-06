@@ -109,9 +109,9 @@ for litag in ultag.find_all('li'):
                         player_entry = re.sub(r"\W+", ' ', cols[0].split("(c)")[0]).strip()
                         if name.split()[-1] in player_entry and name[0] == player_entry[0] and len(players[name]) != 4:
                             players[name].append(player_entry)
-                if (len(players[name]) == 3):
+                if (len(players[name]) == 4):
                     break
-            if (len(players[name]) == 3):
+            if (len(players[name]) == 4):
                 break
 
 players_li = [[name] + players[name] for name in players.keys()]
