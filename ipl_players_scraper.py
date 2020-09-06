@@ -40,7 +40,7 @@ for litag in ultag.find_all('li'):
             name = atag.text.strip()
             href = atag['href']
         print(name)
-        players[name] = []
+        players[name] = [team]
         player_attributes = player.find_all('span')
         
         # Overseas Player
@@ -72,7 +72,7 @@ for litag in ultag.find_all('li'):
         if not player_bs.find("div", {"class": "ciPlayertextbottomborder"}):
             players[name].append("Unknown")
             continue
-        
+
         matches_table = player_bs.find("div", {"class": "ciPlayertextbottomborder"}).find_next_sibling('table')
         match_href = matches_table.find("a", href=True)['href']
         
@@ -115,4 +115,4 @@ for litag in ultag.find_all('li'):
                 break
 
 players_li = [[name] + players[name] for name in players.keys()]
-database_sheet.update([["Name", "Overseas/Domestic", "Role" "Commentary Name"]] + players_li)
+database_sheet.update([["Name", "Team", "Overseas/Domestic", "Role" "Commentary Name"]] + players_li)
