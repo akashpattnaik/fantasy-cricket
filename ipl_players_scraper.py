@@ -12,12 +12,12 @@ import re
 import numpy as np
 import json
 
-scope = ['https://spreadsheets.google.com/feeds','https://www.googleapis.com/auth/drive']
-creds = ServiceAccountCredentials.from_json_keyfile_name('client-secret.json', scope)
-client = gspread.authorize(creds)
-sh = client.open('Fantasy Cricket')
+# scope = ['https://spreadsheets.google.com/feeds','https://www.googleapis.com/auth/drive']
+# creds = ServiceAccountCredentials.from_json_keyfile_name('client-secret.json', scope)
+# client = gspread.authorize(creds)
+# sh = client.open('Fantasy Cricket')
 
-database_sheet = sh.worksheet("IPL Player Database")
+# database_sheet = sh.worksheet("IPL Player Database Backup")
 
 URL = "https://www.espncricinfo.com/ci/content/squad/index.html?object=1210595"
 page = requests.get(URL)
@@ -114,5 +114,11 @@ for litag in ultag.find_all('li'):
             if (len(players[name]) == 4):
                 break
 
-players_li = [[name] + players[name] for name in players.keys()]
-database_sheet.update([["Name", "Team", "Overseas/Domestic", "Role", "Commentary Name"]] + players_li)
+
+json = json.dumps(players)
+f = open("ipl_players.json", "w")
+f.write(json)
+f.close()
+
+# players_li = [[name] + players[name] for name in players.keys()]
+# database_sheet.update([["Name", "Team", "Overseas/Domestic", "Role", "Commentary Name"]] + players_li)
