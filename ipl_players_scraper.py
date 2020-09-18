@@ -74,6 +74,9 @@ for litag in ultag.find_all('li'):
             continue
 
         matches_table = player_bs.find("div", {"class": "ciPlayertextbottomborder"}).find_next_sibling('table')
+        if not matches_table.find("a", href=True)['href']:
+            players[name].append("Unknown")
+            continue
         match_href = matches_table.find("a", href=True)['href']
         
         
