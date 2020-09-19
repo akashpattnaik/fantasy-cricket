@@ -21,7 +21,7 @@ def update_ipl_sheet():
 
     player_cols = ['A', 'D', 'G']
     for col in player_cols:
-        next_col = chr(ord(col) + 1)
+        next_col = chr(ord(col) + 4)
         squad = squad_sheet.get('{}2:{}26'.format(col, col))
         squad_points = []
         for player in squad:
