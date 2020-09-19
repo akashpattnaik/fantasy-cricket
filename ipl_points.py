@@ -67,7 +67,7 @@ for index, row in batting_data.iterrows():
     # Strike Rate
     role = roles_dict[name]
     if role != "Bowler":
-        if (match_info["match_type"] == "odi" and balls >= 20) or (match_info["match_type"] == "t20" and balls >= 10):
+        if (balls >= 10):
             sr_ind = np.searchsorted(points["sr_thresholds"], strike_rate, side='right')
             point_change += [-6, -4, -2, 0][sr_ind]
 
@@ -126,7 +126,7 @@ for index, row in bowling_data.iterrows():
     point_change = points["wicket"]*wickets
 
     ## Economy rate
-    if (match_info["match_type"] == "odi" and overs >= 5) or (match_info["match_type"] == "t20" and overs >= 2):
+    if (overs >= 2):
         econ_ind = np.searchsorted(points["econ_thresholds"], econ_rate, side='right')
         point_change += [6, 4, 2, 0, -2, -4, -6][econ_ind]
 
