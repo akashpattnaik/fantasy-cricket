@@ -6,34 +6,44 @@ import numpy as np
 import json
 
 from scraper import extract_batting_data, extract_bowling_data, find_xis
+from ipl_utils import update_ipl_sheet
 
-with open("match_info.json", "r") as read_file:
+with open("ipl_match_info.json", "r") as read_file:
     match_info = json.load(read_file)
 
 with open("points.json", "r") as read_file:
     points = json.load(read_file)
 
-points = points[match_info["match_type"]]
+points = points["t20"]
     
 scope = ['https://spreadsheets.google.com/feeds','https://www.googleapis.com/auth/drive']
 creds = ServiceAccountCredentials.from_json_keyfile_name('client-secret.json', scope)
 client = gspread.authorize(creds)
 sh = client.open('Fantasy Cricket')
 
-batting_data = extract_batting_data(series_id = match_info["series_id"], match_id = match_info["match_id"])
-bowling_data = extract_bowling_data(series_id = match_info["series_id"], match_id = match_info["match_id"])
+match_ids = list(np.load("ipl_match_ids.npy"))
+players_mat = np.load("ipl_points_matrix.npy")
+series_id = "8048"
 
-players_sheet = sh.worksheet(match_info["players_sheet"])
-selected_teams_sheet = sh.worksheet(match_info["teams_sheet"])
+match_ind = match_ids.index(str(match_info["match_id"]))
+players_mat[match_ind,:] = 0
 
-players_df = pd.DataFrame(players_sheet.get_all_records())
-selected_teams_df = pd.DataFrame(selected_teams_sheet.get_all_records())
+batting_data = extract_batting_data(series_id = series_id, match_id = match_info["match_id"])
+bowling_data = extract_bowling_data(series_id = series_id, match_id = match_info["match_id"])
+
+with open("ipl_players.json") as f:
+    data = json.load(f)
+players_df = pd.DataFrame.from_dict(data).transpose()
+players_df.columns = ["Team", "Overseas/Domestic", "Role", "Commentary Name"]
+players_df.index.name = "Name"
+players_df.reset_index(inplace=True)
 
 points_dict = dict(zip(players_df['Commentary Name'], [0]*len(players_df['Name'])))
 names_dict = dict(zip(players_df['Name'], players_df['Commentary Name']))
 roles_dict = dict(zip(players_df['Commentary Name'], players_df['Role']))
+comm_names = list(players_df["Commentary Name"])
 
-xis = find_xis(names_dict, series_id = match_info["series_id"], match_id = match_info["match_id"])
+xis = find_xis(names_dict, series_id = series_id, match_id = match_info["match_id"])
 
 for index, row in batting_data.iterrows():
     name = row["Name"]
@@ -69,7 +79,7 @@ for index, row in batting_data.iterrows():
     point_change += sixes*points["six_bonus"]
     point_change += fours*points["boundary_bonus"]
     
-    points_dict[name] += point_change
+    players_mat[match_ind, comm_names.index(name)] += point_change
 
     # Fielding
     if dismissal.find("sub (") == -1:
@@ -77,19 +87,19 @@ for index, row in batting_data.iterrows():
         if dismissal.find("c & b") == 0:
             fielder = dismissal.split("c & b")[1].strip()
             fielder_com_name = [name for name in xis if fielder in name]
-            points_dict[fielder_com_name[0]] += points["catch"]
+            players_mat[match_ind, comm_names.index(fielder_com_name[0])] += points["catch"]
         # catch
         elif dismissal.find("c") == 0:
             fielder = dismissal.split("c ")[1].split("b ")[0].strip()
             fielder = re.sub(r"\W+", ' ', fielder).strip()
             fielder_com_name = [name for name in xis if fielder in name]
-            points_dict[fielder_com_name[0]] += points["catch"]
+            players_mat[match_ind, comm_names.index(fielder_com_name[0])] += points["catch"]
         # stumping
         if dismissal.find("st") == 0:
             fielder = dismissal.split("st ")[1].split("b ")[0].strip()
             fielder = re.sub(r"\W+", ' ', fielder).strip()
             fielder_com_name = [name for name in xis if fielder in name]
-            points_dict[fielder_com_name[0]] += points["stumping"]
+            players_mat[match_ind, comm_names.index(fielder_com_name[0])] += points["stumping"]
         # run out
         if dismissal.find("run out") == 0:
             fielders = [x.strip() for x in dismissal.split("run out")[1].replace('(', '').replace(')', '').split("/")]
@@ -104,8 +114,8 @@ for index, row in batting_data.iterrows():
                 catcher = fielders[1]
             thrower_com_name = [name for name in xis if thrower in name]
             catcher_com_name = [name for name in xis if catcher in name]
-            points_dict[thrower_com_name[0]] += points["run_out_throw"]
-            points_dict[catcher_com_name[0]] += points["run_out_catch"]
+            players_mat[match_ind, comm_names.index(thrower_com_name[0])] += points["run_out_throw"]
+            players_mat[match_ind, comm_names.index(catcher_com_name[0])] += points["run_out_catch"]
 
 for index, row in bowling_data.iterrows():
     name = row["Name"]
@@ -125,24 +135,11 @@ for index, row in bowling_data.iterrows():
         point_change += points["four_wkt"]
     if wickets >= 5:
         point_change += points["five_wkt"]
-    points_dict[name] += point_change
+    players_mat[match_ind, comm_names.index(name)] += point_change
 
 for player in xis:
-    points_dict[player] += points["in_xi"]
+    players_mat[match_ind, comm_names.index(player)] += points["in_xi"]
 
-for index, row in selected_teams_df.iterrows():
-    if not isinstance(row["Number"], int):
-        continue
+np.save("ipl_points_matrix", players_mat)
 
-    full_name = row["Player"]
-    capt = row["Captain/Vice Captain"]
-
-    commentary_name = names_dict[full_name]
-    fantasy_points = points_dict[commentary_name]
-
-    if capt == "Captain":
-        fantasy_points = fantasy_points * points["capt_factor"]
-    if capt == "Vice Captain":
-        fantasy_points = fantasy_points * points["vc_factor"]
-
-    selected_teams_sheet.update('G' + str(index+2), fantasy_points)
+update_ipl_sheet()
