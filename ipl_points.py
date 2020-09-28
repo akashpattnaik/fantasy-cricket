@@ -142,4 +142,4 @@ for player in xis:
 
 np.save("ipl_points_matrix", players_mat)
 
-update_ipl_sheet()
+update_ipl_sheet("IPL Squads - Week " + str(match_info["week"]))
