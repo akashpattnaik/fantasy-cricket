@@ -4,15 +4,12 @@ import pandas as pd
 import numpy as np
 import json
 
-def update_ipl_sheet(squad_sheet_name):
+def update_ipl_sheet(squad_sheet_name, points_mat):
     scope = ['https://spreadsheets.google.com/feeds','https://www.googleapis.com/auth/drive']
     creds = ServiceAccountCredentials.from_json_keyfile_name('client-secret.json', scope)
     client = gspread.authorize(creds)
     sh = client.open('Fantasy Cricket')
     squad_sheet = sh.worksheet(squad_sheet_name)
-
-    # squad_sheet_df = pd.DataFrame(squad_sheet.get_all_records())
-    points_mat = np.load("ipl_points_matrix.npy")
 
     with open("ipl_players.json") as f:
         data = json.load(f)
