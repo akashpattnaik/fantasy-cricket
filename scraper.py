@@ -65,7 +65,7 @@ def find_xis(names_dict, series_id, match_id):
             dnb_names = [re.sub(r"\W+", ' ', i.split("(c)")[0]).strip() for i in dnb_names]
             dnb_names = [i for i in dnb_names if i]
             xis.extend(dnb_names)
- 
+    
     for i, table in enumerate(table_body):
         rows = table.find_all('tr')
         for row in rows:
@@ -77,4 +77,13 @@ def find_xis(names_dict, series_id, match_id):
                 if cols[1] == 'Batsman' or cols[1] == 'Allrounder' or cols[1] == 'Bowler' or cols[1] == 'Wicketkeeper':
                     name = re.sub(r"\W+", ' ', cols[0].split("(c)")[0]).strip()
                     xis.append(names_dict[name])
+    if len(set(xis))  != 22:
+        for i, table in enumerate(table_foot):
+            rows = table.find_all('tr')
+            dnb_names = rows[1].find_all('span')
+            dnb_names = [x.text.replace(u'\xa0', '').strip(' ,') for x in dnb_names]
+            dnb_names = [re.sub(r"\W+", ' ', i.split("(c)")[0]).strip() for i in dnb_names]
+            dnb_names = [i for i in dnb_names if i]
+            xis.extend(dnb_names)
+
     return set(xis)

@@ -93,7 +93,14 @@ for ind, match_id in enumerate(match_info["match_ids"]):
                 fielder = dismissal.split("c ")[1].split("b ")[0].strip()
                 fielder = re.sub(r"\W+", ' ', fielder).strip()
                 fielder_com_name = [name for name in xis if fielder in name]
-                players_mat[ind, comm_names.index(fielder_com_name[0])] += points["catch"]
+                try:
+                    players_mat[ind, comm_names.index(fielder_com_name[0])] += points["catch"]
+                except:
+                    print(fielder)
+                    print(xis)
+                    print(fielder_com_name)
+                    print(comm_names.index(fielder_com_name[0]))
+                    print(players_mat.shape)
             # stumping
             if dismissal.find("st") == 0:
                 fielder = dismissal.split("st ")[1].split("b ")[0].strip()
