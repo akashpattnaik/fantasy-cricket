@@ -119,10 +119,13 @@ for ind, match_id in enumerate(match_info["match_ids"]):
                 else:
                     thrower = fielders[0]
                     catcher = fielders[1]
-                thrower_com_name = [name for name in xis if thrower in name]
-                catcher_com_name = [name for name in xis if catcher in name]
-                players_mat[ind, comm_names.index(thrower_com_name[0])] += points["run_out_throw"]
-                players_mat[ind, comm_names.index(catcher_com_name[0])] += points["run_out_catch"]
+                
+                if not "sub" in thrower:
+                    thrower_com_name = [name for name in xis if thrower in name]
+                    players_mat[ind, comm_names.index(thrower_com_name[0])] += points["run_out_throw"]
+                if not "sub" in catcher:
+                    catcher_com_name = [name for name in xis if catcher in name]
+                    players_mat[ind, comm_names.index(catcher_com_name[0])] += points["run_out_catch"]
 
     for index, row in bowling_data.iterrows():
         name = row["Name"]
