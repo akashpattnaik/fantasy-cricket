@@ -81,19 +81,19 @@ for index, row in batting_data.iterrows():
         # catch
         elif dismissal.find("c") == 0:
             fielder = dismissal.split("c ")[1].split("b ")[0].strip()
-            fielder = re.sub(r"\W+", ' ', fielder).strip()
+            fielder = re.sub(r"[^\w-]+", ' ', fielder).strip()
             fielder_com_name = [name for name in xis if fielder in name]
             points_dict[fielder_com_name[0]] += points["catch"]
         # stumping
         if dismissal.find("st") == 0:
             fielder = dismissal.split("st ")[1].split("b ")[0].strip()
-            fielder = re.sub(r"\W+", ' ', fielder).strip()
+            fielder = re.sub(r"[^\w-]+", ' ', fielder).strip()
             fielder_com_name = [name for name in xis if fielder in name]
             points_dict[fielder_com_name[0]] += points["stumping"]
         # run out
         if dismissal.find("run out") == 0:
             fielders = [x.strip() for x in dismissal.split("run out")[1].replace('(', '').replace(')', '').split("/")]
-            fielders = [re.sub(r"\W+", ' ', i).strip() for i in fielders]
+            fielders = [re.sub(r"[^\w-]+", ' ', i).strip() for i in fielders]
             if len(fielders) >= 3:
                 fielders = fielders[-2:]
             if len(fielders) == 1:
